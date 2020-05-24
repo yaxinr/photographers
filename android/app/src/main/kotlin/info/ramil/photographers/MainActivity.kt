@@ -1,0 +1,6 @@
+package info.ramil.photographers
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity: FlutterActivity() {
+}
