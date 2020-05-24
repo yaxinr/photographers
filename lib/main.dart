@@ -95,15 +95,12 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       height: 100,
                       child: FlatButton(
                         onPressed: getImage,
-                        child: Center(
-                          child: _image == null
-                              ? Text('No image selected.')
-                              : Image.file(
-                                  _image,
-                                  fit: BoxFit.fitHeight,
-                                  height: 20.0,
-                                ),
-                        ),
+                        child: _image == null
+                            ? Text('No image selected.')
+                            : Image.file(
+                                _image,
+                                fit: BoxFit.fitHeight,
+                              ),
                       ),
                     ),
                   ]),
