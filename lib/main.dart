@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:place_picker/place_picker.dart';
 
 void main() {
   //runApp(MaterialApp(home: Text('ss123')));
@@ -58,6 +59,7 @@ class ProfileWidget extends StatefulWidget {
 class _ProfileWidgetState extends State<ProfileWidget> {
   String _bio;
   File _image;
+  LocationResult _location;
 
   Future getImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.camera);
@@ -67,14 +69,16 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     });
   }
 
+  Future showPlacePicker() async {
+    LocationResult result = await Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) =>
+            PlacePicker("AIzaSyDBYhfd2OAaTUvce5omhI8Ih2qO5S6G7YA")));
+
+    setState(() => _location = result);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -82,8 +86,6 @@ class _ProfileWidgetState extends State<ProfileWidget> {
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
           children: <Widget>[
             Card(
@@ -104,6 +106,20 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       ),
                     ),
                   ]),
+            ),
+            Card(
+              child: ListTile(
+                leading: Text('Location'),
+                trailing: FlatButton(
+                  onPressed: showPlacePicker,
+                  child: Text(
+                    // ignore: null_aware_in_condition
+                    _location?.city?.name?.isEmpty ?? true
+                        ? 'select location...'
+                        : '${_location.city.name}, ${_location.country.shortName}',
+                  ),
+                ),
+              ),
             ),
             Card(
               child: ListTile(
@@ -131,11 +147,6 @@ class _ProfileWidgetState extends State<ProfileWidget> {
           ],
         ),
       ),
-//      floatingActionButton: FloatingActionButton(
-//        onPressed: _incrementCounter,
-//        tooltip: 'Increment',
-//        child: Icon(Icons.add),
-//      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
