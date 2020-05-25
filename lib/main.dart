@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_place_picker/google_maps_place_picker.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:place_picker/place_picker.dart';
 
 void main() {
   //runApp(MaterialApp(home: Text('ss123')));
@@ -59,7 +59,7 @@ class ProfileWidget extends StatefulWidget {
 class _ProfileWidgetState extends State<ProfileWidget> {
   String _bio;
   File _image;
-  LocationResult _location;
+  PickResult _location;
 
   Future getImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.camera);
@@ -70,11 +70,20 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   }
 
   Future showPlacePicker() async {
-    LocationResult result = await Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) =>
-            PlacePicker("AIzaSyDBYhfd2OAaTUvce5omhI8Ih2qO5S6G7YA")));
-
-    setState(() => _location = result);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PlacePicker(
+          apiKey:
+              'AIzaSyDBYhfd2OAaTUvce5omhI8Ih2qO5S6G7YA', // Put YOUR OWN KEY here.
+          onPlacePicked: (result) {
+            setState(() => _location = result);
+            Navigator.of(context).pop();
+          },
+          useCurrentLocation: true, initialPosition: null,
+        ),
+      ),
+    );
   }
 
   @override
@@ -113,10 +122,11 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                 trailing: FlatButton(
                   onPressed: showPlacePicker,
                   child: Text(
-                    // ignore: null_aware_in_condition
-                    _location?.city?.name?.isEmpty ?? true
+                    // ignore:.null_aware_in_condition
+//                      formattedAddress ?? 'select location...'
+                    _location?.formattedAddress?.isEmpty ?? true
                         ? 'select location...'
-                        : '${_location.city.name}, ${_location.country.shortName}',
+                        : '${_location.formattedAddress}',
                   ),
                 ),
               ),
