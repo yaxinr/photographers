@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_place_picker/google_maps_place_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:email_validator/email_validator.dart';
 
 void main() {
   //runApp(MaterialApp(home: Text('ss123')));
@@ -53,6 +55,8 @@ class ProfileWidget extends StatefulWidget {
 }
 
 class _ProfileWidgetState extends State<ProfileWidget> {
+  String _email;
+  String _phone;
   String _bio;
   String _styles;
   File _image;
@@ -123,6 +127,48 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                         ? 'select location...'
                         : '${_location.formattedAddress}',
                   ),
+                ),
+              ),
+            ),
+            Card(
+              child: ListTile(
+                leading: Text('Email'),
+                trailing: FlatButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => EmailEditorWidget(
+                                textValue: _email,
+                                caption: 'Email',
+                              )),
+                    );
+                    if (!(result?.isEmpty ?? true)) {
+                      setState(() => _email = result);
+                    }
+                  },
+                  child: Text(_email ?? '...'),
+                ),
+              ),
+            ),
+            Card(
+              child: ListTile(
+                leading: Text('Phone'),
+                trailing: FlatButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PhoneEditorWidget(
+                                textValue: _phone,
+                                caption: 'Phone',
+                              )),
+                    );
+                    if (!(result?.isEmpty ?? true)) {
+                      setState(() => _phone = result);
+                    }
+                  },
+                  child: Text(_phone ?? '...'),
                 ),
               ),
             ),
@@ -237,36 +283,102 @@ class MemoEditorWidget extends StatelessWidget {
   }
 }
 
-class PhotoEditorWidget extends StatefulWidget {
-  @override
-  _PhotoEditorWidgetState createState() => _PhotoEditorWidgetState();
-}
+class EmailEditorWidget extends StatelessWidget {
+  final textController = TextEditingController();
 
-class _PhotoEditorWidgetState extends State<PhotoEditorWidget> {
-  File _image;
+  final String textValue;
+  final String caption;
 
-  Future getImage() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.camera);
-
-    setState(() {
-      _image = image;
-    });
-  }
+  EmailEditorWidget({Key key, @required this.textValue, @required this.caption})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    textController.text = textValue;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Image Picker Example'),
+        title: Text(caption),
+        actions: <Widget>[
+          FlatButton(
+            onPressed: () {
+              var email = textController.text;
+              if (EmailValidator.validate(email))
+                Navigator.pop(context, email);
+              else
+                _showError(context, 'Email not valid');
+            },
+            child: Text('Ok'),
+          ),
+        ],
       ),
-      body: Center(
-        child: _image == null ? Text('No image selected.') : Image.file(_image),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: getImage,
-        tooltip: 'Pick Image',
-        child: Icon(Icons.add_a_photo),
+      body: TextField(
+        controller: textController,
+        autofocus: true,
+        decoration:
+            InputDecoration(border: InputBorder.none, hintText: 'Enter email'),
+        onSubmitted: (email) {
+          if (EmailValidator.validate(email))
+            Navigator.pop(context, email);
+          else
+            _showError(context, 'Email not valid');
+        },
       ),
     );
   }
+}
+
+class PhoneEditorWidget extends StatelessWidget {
+  final textController = TextEditingController();
+
+  final String textValue;
+  final String caption;
+
+  PhoneEditorWidget({Key key, @required this.textValue, @required this.caption})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    textController.text = textValue;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(caption),
+        actions: <Widget>[
+          FlatButton(
+            onPressed: () {
+              Navigator.pop(context, textController.text);
+            },
+            child: Text('Ok'),
+          ),
+        ],
+      ),
+      body: TextField(
+        controller: textController,
+        autofocus: true,
+        decoration: InputDecoration(labelText: "Enter your number"),
+        keyboardType: TextInputType.number,
+        inputFormatters: <TextInputFormatter>[
+          WhitelistingTextInputFormatter.digitsOnly
+        ],
+        onSubmitted: (value) => Navigator.pop(context, value),
+      ),
+    );
+  }
+}
+
+Future<void> _showError(BuildContext context, String title) async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Back'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      );
+    },
+  );
 }
