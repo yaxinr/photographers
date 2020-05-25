@@ -58,6 +58,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   String _email;
   String _phone;
   String _bio;
+  String _slogan;
   String _styles;
   File _image;
   PickResult _location;
@@ -93,14 +94,23 @@ class _ProfileWidgetState extends State<ProfileWidget> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Card(
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text('Name'),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: <Widget>[
+                          Text('Ilon Mask'),
+                          Text(fmtValue(_slogan, ' '))
+                        ],
+                      ),
+                    ),
                     Container(
                       height: 100,
                       child: FlatButton(
@@ -114,6 +124,11 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       ),
                     ),
                   ]),
+            ),
+            RaisedButton(
+              color: Colors.lightGreen,
+              child: Text('Check profile'),
+              onPressed: () {},
             ),
             Card(
               child: ListTile(
@@ -132,22 +147,10 @@ class _ProfileWidgetState extends State<ProfileWidget> {
             ),
             Card(
               child: ListTile(
-                leading: Text('Email'),
+                leading: Text('Styles'),
                 trailing: FlatButton(
-                  onPressed: () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => EmailEditorWidget(
-                                textValue: _email,
-                                caption: 'Email',
-                              )),
-                    );
-                    if (!(result?.isEmpty ?? true)) {
-                      setState(() => _email = result);
-                    }
-                  },
-                  child: Text(_email ?? '...'),
+                  onPressed: () => _showStylesEditor(context),
+                  child: Text(fmtValue(_styles, ', ')),
                 ),
               ),
             ),
@@ -174,14 +177,22 @@ class _ProfileWidgetState extends State<ProfileWidget> {
             ),
             Card(
               child: ListTile(
-                leading: Text('Styles'),
+                leading: Text('Email'),
                 trailing: FlatButton(
-                  onPressed: () {
-                    _showStylesEditor(context);
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => EmailEditorWidget(
+                                textValue: _email,
+                                caption: 'Email',
+                              )),
+                    );
+                    if (!(result?.isEmpty ?? true)) {
+                      setState(() => _email = result);
+                    }
                   },
-                  child: Text(
-                    fmtValue(_styles, ', '),
-                  ),
+                  child: Text(_email ?? '...'),
                 ),
               ),
             ),
@@ -189,14 +200,36 @@ class _ProfileWidgetState extends State<ProfileWidget> {
               child: ListTile(
                 leading: Text('Bio'),
                 trailing: FlatButton(
-                  onPressed: () {
-                    _showBioEditor(context);
-                  },
-                  child: Text(
-                    fmtValue(_bio, ' '),
-                  ),
+                  onPressed: () => _showBioEditor(context),
+                  child: Text(fmtValue(_bio, ' ')),
                 ),
               ),
+            ),
+            Card(
+              child: ListTile(
+                leading: Text('Slogan'),
+                trailing: FlatButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => MemoEditorWidget(
+                                textValue: _slogan,
+                                caption: 'Slogan',
+                              )),
+                    );
+                    if (!(result?.isEmpty ?? true)) {
+                      setState(() => _slogan = result);
+                    }
+                  },
+                  child: Text(fmtValue(_slogan, ' ')),
+                ),
+              ),
+            ),
+            RaisedButton(
+              color: Colors.blue,
+              child: Text('Log out'),
+              onPressed: () {},
             ),
           ],
         ),
@@ -263,10 +296,8 @@ class MemoEditorWidget extends StatelessWidget {
       appBar: AppBar(
         title: Text(caption),
         actions: <Widget>[
-          RaisedButton(
-            onPressed: () {
-              Navigator.pop(context, textController.text);
-            },
+          FlatButton(
+            onPressed: () => Navigator.pop(context, textController.text),
             child: Text('Ok'),
           ),
         ],
