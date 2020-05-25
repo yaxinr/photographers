@@ -41,10 +41,6 @@ class MyApp extends StatelessWidget {
 class ProfileWidget extends StatefulWidget {
   ProfileWidget({Key key, this.title}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
   // This class is the configuration for the state. It holds the values (in this
   // case the title) provided by the parent (in this case the App widget) and
   // used by the build method of the State. Fields in a Widget subclass are
@@ -91,8 +87,6 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: Center(
@@ -137,10 +131,10 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                 leading: Text('Styles'),
                 trailing: FlatButton(
                   onPressed: () {
-                    _navigateStylesEditor(context);
+                    _showStylesEditor(context);
                   },
                   child: Text(
-                    fmtValue(_styles),
+                    fmtValue(_styles, ', '),
                   ),
                 ),
               ),
@@ -150,10 +144,10 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                 leading: Text('Bio'),
                 trailing: FlatButton(
                   onPressed: () {
-                    _navigateAndDisplaySelection(context);
+                    _showBioEditor(context);
                   },
                   child: Text(
-                    fmtValue(_bio),
+                    fmtValue(_bio, ' '),
                   ),
                 ),
               ),
@@ -164,19 +158,20 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     );
   }
 
-  String fmtValue(String s) {
+  String fmtValue(String s, String delimiter) {
     return s?.isEmpty ?? true
         ? '...'
         : (s.length > 40 ? s.substring(0, 40) + '...' : s)
-            .replaceAll('\n', ' ');
+            .replaceAll('\n', delimiter ?? ' ');
   }
 
-  void _navigateAndDisplaySelection(BuildContext context) async {
+  void _showBioEditor(BuildContext context) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => ProfileBioEditorWidget(
+          builder: (context) => MemoEditorWidget(
                 textValue: _bio,
+                caption: 'Biography',
               )),
     );
     if (!(result?.isEmpty ?? true)) {
@@ -184,12 +179,13 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     }
   }
 
-  void _navigateStylesEditor(BuildContext context) async {
+  void _showStylesEditor(BuildContext context) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => ProfileBioEditorWidget(
+          builder: (context) => MemoEditorWidget(
                 textValue: _styles,
+                caption: 'Styles',
               )),
     );
     if (!(result?.isEmpty ?? true)) {
@@ -198,12 +194,13 @@ class _ProfileWidgetState extends State<ProfileWidget> {
   }
 }
 
-class ProfileStylesEditorWidget extends StatelessWidget {
+class MemoEditorWidget extends StatelessWidget {
   final textController = TextEditingController();
 
   final String textValue;
+  final String caption;
 
-  ProfileStylesEditorWidget({Key key, @required this.textValue})
+  MemoEditorWidget({Key key, @required this.textValue, @required this.caption})
       : super(key: key);
 
 //  @override
@@ -218,46 +215,7 @@ class ProfileStylesEditorWidget extends StatelessWidget {
     textController.text = textValue;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Biography"),
-        actions: <Widget>[
-          RaisedButton(
-            onPressed: () {
-              Navigator.pop(context, textController.text);
-            },
-            child: Text('Ok'),
-          ),
-        ],
-      ),
-      body: TextField(
-        controller: textController,
-        autofocus: true,
-        decoration:
-            InputDecoration(border: InputBorder.none, hintText: 'Enter a text'),
-      ),
-    );
-  }
-}
-
-class ProfileBioEditorWidget extends StatelessWidget {
-  final textController = TextEditingController();
-
-  final String textValue;
-
-  ProfileBioEditorWidget({Key key, @required this.textValue}) : super(key: key);
-
-//  @override
-  void dispose() {
-    // Clean up the controller when the widget is disposed.
-    textController.dispose();
-//    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    textController.text = textValue;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Biography"),
+        title: Text(caption),
         actions: <Widget>[
           RaisedButton(
             onPressed: () {
