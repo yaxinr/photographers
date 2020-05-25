@@ -58,6 +58,7 @@ class ProfileWidget extends StatefulWidget {
 
 class _ProfileWidgetState extends State<ProfileWidget> {
   String _bio;
+  String _styles;
   File _image;
   PickResult _location;
 
@@ -133,31 +134,41 @@ class _ProfileWidgetState extends State<ProfileWidget> {
             ),
             Card(
               child: ListTile(
-                leading: Text('Bio'),
-                title: FlatButton(
+                leading: Text('Styles'),
+                trailing: FlatButton(
                   onPressed: () {
-                    _navigateAndDisplaySelection(context);
+                    _navigateStylesEditor(context);
                   },
                   child: Text(
-                    // ignore: null_aware_in_condition
-                    _bio?.isEmpty ?? true ? '...' : _bio,
+                    fmtValue(_styles),
                   ),
                 ),
               ),
             ),
-//            Card(
-//              child: ListTile(
-//                leading: Text('Phone'),
-//                title: FlatButton(
-//                  onPressed: _showBioDialog,
-//                  child: Text("..."),
-//                ),
-//              ),
-//            ),
+            Card(
+              child: ListTile(
+                leading: Text('Bio'),
+                trailing: FlatButton(
+                  onPressed: () {
+                    _navigateAndDisplaySelection(context);
+                  },
+                  child: Text(
+                    fmtValue(_bio),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  String fmtValue(String s) {
+    return s?.isEmpty ?? true
+        ? '...'
+        : (s.length > 40 ? s.substring(0, 40) + '...' : s)
+            .replaceAll('\n', ' ');
   }
 
   void _navigateAndDisplaySelection(BuildContext context) async {
@@ -171,6 +182,59 @@ class _ProfileWidgetState extends State<ProfileWidget> {
     if (!(result?.isEmpty ?? true)) {
       setState(() => _bio = result);
     }
+  }
+
+  void _navigateStylesEditor(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => ProfileBioEditorWidget(
+                textValue: _styles,
+              )),
+    );
+    if (!(result?.isEmpty ?? true)) {
+      setState(() => _styles = result);
+    }
+  }
+}
+
+class ProfileStylesEditorWidget extends StatelessWidget {
+  final textController = TextEditingController();
+
+  final String textValue;
+
+  ProfileStylesEditorWidget({Key key, @required this.textValue})
+      : super(key: key);
+
+//  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    textController.dispose();
+//    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    textController.text = textValue;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Biography"),
+        actions: <Widget>[
+          RaisedButton(
+            onPressed: () {
+              Navigator.pop(context, textController.text);
+            },
+            child: Text('Ok'),
+          ),
+        ],
+      ),
+      body: TextField(
+        controller: textController,
+        autofocus: true,
+        decoration:
+            InputDecoration(border: InputBorder.none, hintText: 'Enter a text'),
+      ),
+    );
   }
 }
 
@@ -204,6 +268,8 @@ class ProfileBioEditorWidget extends StatelessWidget {
         ],
       ),
       body: TextField(
+        maxLines: null,
+        expands: true,
         controller: textController,
         autofocus: true,
         decoration:
